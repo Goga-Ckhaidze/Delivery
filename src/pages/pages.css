@@ -1,0 +1,109 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Glovo", "Arial", "Helvetica Neue", Helvetica, sans-serif;
+
+}
+
+.card {
+    max-width: 33.333%;
+    min-width: 33.333%;
+    padding: 15px;
+}
+
+.burgerImages {
+    width: 100%;
+    height: 325px;
+}
+
+.cardFlex {
+    display: flex;
+}
+
+.padding-tb {
+    padding: 85px 0;
+}
+
+
+.burgerTitle {
+    font-size: 24px;
+    padding: 15px;
+    color: #ffc440;
+}
+
+.price {
+    font-size: 17px;
+    padding: 0px 15px 15px 18px;
+    color: #cc9e2f;
+}
+
+.order-btn {
+  background-color: #292929;   
+  color: #ffc440;             
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 30px 15px 15px 18px;
+}
+
+.order-btn:hover {
+  background-color: #3b261e;   
+  transform: scale(1.05);
+}
+
+.order-btn:active {
+  background-color: #2b1b15;   
+  transform: scale(1.05);
+}
+
+.sushis {
+    height: 400px;
+    width: 100%;
+}
+
+.sushiTitle {
+    display: inline-block;
+}
+
+.welcomeImage {
+    width: 250px;
+    height: auto;
+}
+
+.bottom {
+    background-image: url('/images/ttt.avif');
+    width: 100%;
+    height: 215px;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+.div {
+padding-top: 50px;
+}
+
+.pd-50 {
+    padding: 60px;
+}
+
+.sushiTitle {
+    color: #ffc440;
+    padding-right: 20px;
+}
+
+.welcomeImage {
+    height: 200px;
+}
+
+.welcomeDivv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
