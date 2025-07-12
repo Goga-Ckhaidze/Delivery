@@ -4,7 +4,7 @@ import Sushi from './pages/Sushi.jsx';
 import Pizza from './pages/Pizza.jsx';
 import BurgerPage from './pages/BurgerPage.jsx';
 import Index from './components/Index.jsx'
-import Second from './components/second.jsx'
+import Second from './components/Second.jsx'
 import Map from './pages/Map.jsx';
 import CartPage from './pages/CartPage.jsx';
 import Payment from './pages/Payment.jsx';
