@@ -15,8 +15,8 @@ import MyOrders from './pages/MyOrder.jsx';
 function App() {
   return (
     <Routes>
-      <Route path='/signup' element={<Index/>}></Route>
-      <Route path='/login' element={<Second/>}></Route>
+      <Route path='/signup' element={<Index/>} />
+      <Route path='/login' element={<Second/>} />
       <Route path="/" element={<Home />} />
       <Route path="/burger" element={<BurgerPage />} />
       <Route path="/sushi" element={<Sushi />} />
