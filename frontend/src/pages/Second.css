@@ -1,0 +1,173 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.cart-container-outer {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.cart-title {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  color: #1e293b;
+}
+
+.empty-message {
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+.centera {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-card {
+  display: flex;
+  gap: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.cart-card:hover {
+  transform: translateY(-2px);
+}
+
+.cart-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.cart-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cart-details h3 {
+  font-size: 1.3rem;
+  margin: 0;
+  color: #0f172a;
+}
+
+.cart-subtotal {
+  font-weight: 600;
+  color: #1e40af;
+  margin-top: 4px;
+}
+
+.cart-total {
+  margin-top: 30px;
+  text-align: right;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.checkout-btn {
+  margin-top: 10px;
+  padding: 12px 24px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.checkout-btn:hover {
+  background: #1e3a8a;
+}
+
+.remove-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.remove-btn:hover {
+  background: #dc2626;
+}
+
+.clear-btn {
+  margin-left: 12px;
+  padding: 10px 20px;
+  background: #f43f5e;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: #be123c;
+}
+
+.get-btn {
+  margin-left: 12px;
+  padding: 10px 20px;
+  background: green;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.get-btn:hover {
+  background: rgb(0, 173, 0);
+}
+
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.qty-btn {
+  background: #e0e7ff;
+  color: #1e3a8a;
+  border: none;
+  font-size: 18px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.qty-btn:hover {
+  background: #c7d2fe;
+}
