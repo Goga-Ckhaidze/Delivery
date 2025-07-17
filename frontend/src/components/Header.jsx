@@ -22,10 +22,10 @@ function Header() {
     removeFromCart,
   } = useCart();
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [hasOrders, setHasOrders] = useState(false);
 
-  // Decode token to get user info
   const userData = token ? parseJwt(token) : null;
   const userId = userData?._id || null;
   const role = userData?.role || null;
@@ -70,7 +70,12 @@ function Header() {
           <Link to={'/'} className="link">
             <h1 className="headerTitle">Delivery🌍</h1>
           </Link>
-          <div>
+
+          <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+            ☰
+          </div>
+
+          <div className={`nav-buttons ${menuOpen ? 'open' : ''}`}>
             <div
               className="cart-container"
               onMouseEnter={() => setShowDropdown(true)}
@@ -79,7 +84,6 @@ function Header() {
               <button className="login">
                 🛒 Cart ({cartCount})
               </button>
-
               {showDropdown && (
                 <div className="cart-dropdown">
                   {cartItems.length === 0 ? (
@@ -91,34 +95,17 @@ function Header() {
                           <li key={index} className="cart-item">
                             <span>{item.title}</span>
                             <div className="cart-controls">
-                              <button
-                                onClick={() => decrementItem(item.title)}
-                                className="qty-btn-sm"
-                              >
-                                −
-                              </button>
+                              <button onClick={() => decrementItem(item.title)} className="qty-btn-sm">−</button>
                               <span>{item.quantity}</span>
-                              <button
-                                onClick={() => incrementItem(item.title)}
-                                className="qty-btn-sm"
-                              >
-                                +
-                              </button>
+                              <button onClick={() => incrementItem(item.title)} className="qty-btn-sm">+</button>
                             </div>
                             <span>${(item.price * item.quantity).toFixed(2)}</span>
-                            <button
-                              onClick={() => removeFromCart(item.title)}
-                              className="remove-small"
-                            >
-                              ×
-                            </button>
+                            <button onClick={() => removeFromCart(item.title)} className="remove-small">×</button>
                           </li>
                         ))}
                       </ul>
                       <div className="cart-total">Total: ${total.toFixed(2)}</div>
-                      <Link to="/cart" className="go-to-cart">
-                        Go to Cart
-                      </Link>
+                      <Link to="/cart" className="go-to-cart">Go to Cart</Link>
                     </>
                   )}
                 </div>
@@ -127,20 +114,17 @@ function Header() {
 
             {!token ? (
               <Link to="/login">
-                <button className="login">
-                  <span className="symbol">👤</span> Login
-                </button>
+                <button className="login">👤 Login</button>
               </Link>
             ) : (
               <>
-                              {/* Show "Your Order" button ONLY if user is NOT delivery guy and has orders */}
                 {role !== 'delivery' && hasOrders && (
                   <Link to="/my-orders">
-                    <button className="login zzzz">🧀 Your Order</button>
+                    <button className="login">🧀 Your Order</button>
                   </Link>
                 )}
                 <button className="login" onClick={handleLogout}>
-                  <span className="symbol">🔓</span> Logout
+                  🔓 Logout
                 </button>
               </>
             )}
