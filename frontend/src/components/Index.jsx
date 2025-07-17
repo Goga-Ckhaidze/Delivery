@@ -1,6 +1,7 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Index = () => {
   const [data, setData] = useState({
@@ -8,9 +9,10 @@ const Index = () => {
     lastName: "",
     email: "",
     password: "",
-    role: "" // added role
+    role: ""
   });
 
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [error, setError] = useState();
   const navigate = useNavigate();
 
@@ -20,10 +22,19 @@ const Index = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("https://deliveryback-y8wi.onrender.com/api/users", data);
-      const { token } = response.data;
 
+    if (!captchaToken) {
+      setError("Please verify you are not a robot.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("https://deliveryback-y8wi.onrender.com/api/users", {
+        ...data,
+        captchaToken
+      });
+
+      const { token } = response.data;
       localStorage.setItem("token", token);
       navigate("/");
       window.location.reload();
@@ -40,9 +51,7 @@ const Index = () => {
         <div className="left">
           <h1>Welcome Back</h1>
           <Link to="/login">
-            <button type="button" className="white_btn">
-              Sign in
-            </button>
+            <button type="button" className="white_btn">Sign in</button>
           </Link>
         </div>
         <div className="right">
@@ -85,7 +94,6 @@ const Index = () => {
               onChange={handleChange}
             />
 
-            {/* Role select input */}
             <select
               name="role"
               value={data.role}
@@ -94,17 +102,18 @@ const Index = () => {
               className="input"
               style={{ marginBottom: '15px' }}
             >
-              <option value="" disabled>
-                Select Role
-              </option>
+              <option value="" disabled>Select Role</option>
               <option value="customer">Customer</option>
               <option value="delivery">Delivery Person</option>
             </select>
 
+            <ReCAPTCHA
+              sitekey="6LeWRIYrAAAAAL2JZW2e1NMZy977e8xpA315HVxO"
+              onChange={(token) => setCaptchaToken(token)}
+            />
+
             {error && <div className="error_msg">{error}</div>}
-            <button type="submit" className="green_btn">
-              Sign Up
-            </button>
+            <button type="submit" className="green_btn">Sign Up</button>
           </form>
         </div>
       </div>
