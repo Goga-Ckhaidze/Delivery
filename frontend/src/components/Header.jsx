@@ -38,7 +38,7 @@ function Header() {
 
     async function checkOrders() {
       try {
-        const res = await fetch(`http://localhost:5000/api/orders?userId=${userId}`);
+        const res = await fetch(`https://deliveryback-y8wi.onrender.com/api/orders?userId=${userId}`);
         if (!res.ok) {
           setHasOrders(false);
           return;

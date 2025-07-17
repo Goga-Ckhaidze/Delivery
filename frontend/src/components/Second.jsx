@@ -18,7 +18,7 @@ const Second = () => {
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const response = await axios.post("http://localhost:5000/api/auth", data);
+    const response = await axios.post("https://deliveryback-y8wi.onrender.com/api/auth", data);
     const { token } = response.data;
 
     localStorage.setItem("token", token);

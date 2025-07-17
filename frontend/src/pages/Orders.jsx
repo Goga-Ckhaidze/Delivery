@@ -46,7 +46,7 @@ function Orders() {
 
     async function fetchOrders() {
       try {
-        const response = await fetch('http://localhost:5000/api/orders');
+        const response = await fetch('https://deliveryback-y8wi.onrender.com/api/orders');
         const data = await response.json();
 
         const filtered = data.filter(order => {
@@ -125,7 +125,7 @@ function Orders() {
     try {
       const deliveryEndTimeISO = new Date(Date.now() + deliveryTime * 60000).toISOString();
 
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}/take`, {
+      const res = await fetch(`https://deliveryback-y8wi.onrender.com/api/orders/${orderId}/take`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ deliveryGuyID, deliveryTime, deliveryEndTime: deliveryEndTimeISO }),
