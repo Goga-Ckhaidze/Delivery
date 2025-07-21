@@ -1,92 +1,95 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useReducer, useEffect } from "react";
+import axios from "axios";
 
-const CartContext = createContext();
+export const CartContext = createContext();
 
-export function useCart() {
-  return useContext(CartContext);
-}
+const initialState = {
+  cartItems: [],
+  loading: true,
+  error: null,
+  cartId: null,
+};
 
-function decodeToken(token) {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch {
-    return null;
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_CART":
+      return {
+        ...state,
+        cartItems: action.payload.items,
+        cartId: action.payload._id,
+        loading: false,
+        error: null,
+      };
+    case "ADD_ITEM":
+      return {
+        ...state,
+        cartItems: [...state.cartItems, action.payload],
+      };
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: action.payload,
+        loading: false,
+      };
+    default:
+      return state;
   }
 }
 
-export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
+export const CartProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Fetch cart once on mount
+  // Load cart from backend or create new one
   useEffect(() => {
-    (async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const decoded = decodeToken(token);
-      if (!decoded?.id) return;
-
+    async function fetchOrCreateCart() {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/cart/${decoded.id}`);
-        if (Array.isArray(data.items)) setCartItems(data.items);
-      } catch (e) {
-        console.error('Fetch cart failed:', e);
+        const savedCartId = localStorage.getItem("cartId");
+        if (savedCartId) {
+          // Try to get existing cart
+          const res = await axios.get(`https://deliveryback-y8wi.onrender.com/api/cart/${savedCartId}`);
+          dispatch({ type: "SET_CART", payload: res.data });
+        } else {
+          // Create new cart
+          const res = await axios.post("https://deliveryback-y8wi.onrender.com/api/cart", { items: [] });
+          localStorage.setItem("cartId", res.data._id);
+          dispatch({ type: "SET_CART", payload: res.data });
+        }
+      } catch (error) {
+        console.error("Error fetching or creating cart:", error);
+        dispatch({ type: "SET_ERROR", payload: error.message });
       }
-    })();
+    }
+    fetchOrCreateCart();
   }, []);
 
-  // Sync cart on changes (skip if empty to avoid overwriting)
-  useEffect(() => {
-    if (cartItems.length === 0) return;
-    (async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+  // Add item to cart locally and sync with backend
+  const addItem = async (item) => {
+    try {
+      const updatedItems = [...state.cartItems, item];
+      dispatch({ type: "ADD_ITEM", payload: item });
 
-      const decoded = decodeToken(token);
-      if (!decoded?.id) return;
-
-      try {
-        await axios.post('http://localhost:5000/api/cart', {
-          userId: decoded.id,
-          items: cartItems,
+      // Sync with backend
+      if (state.cartId) {
+        await axios.put(`https://deliveryback-y8wi.onrender.com/api/cart/${state.cartId}`, {
+          items: updatedItems,
         });
-      } catch (e) {
-        console.error('Sync cart failed:', e);
       }
-    })();
-  }, [cartItems]);
-
-  const addToCart = (item) => {
-    setCartItems((prev) => {
-      const exists = prev.find(i => i.productId === item.productId);
-      if (exists) {
-        return prev.map(i => i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i);
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
+    } catch (error) {
+      console.error("Error syncing cart:", error);
+      dispatch({ type: "SET_ERROR", payload: error.message });
+    }
   };
 
-  const incrementItem = (productId) => setCartItems(prev => prev.map(i => i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i));
-
-  const decrementItem = (productId) =>
-    setCartItems(prev =>
-      prev
-        .map(i => i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i)
-        .filter(i => i.quantity > 0)
-    );
-
-  const removeFromCart = (productId) => setCartItems(prev => prev.filter(i => i.productId !== productId));
-
-  const clearCart = () => setCartItems([]);
-
-  const cartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
-
   return (
-    <CartContext.Provider value={{
-      cartItems, addToCart, incrementItem, decrementItem, removeFromCart, clearCart, cartCount
-    }}>
+    <CartContext.Provider
+      value={{
+        cartItems: state.cartItems,
+        loading: state.loading,
+        error: state.error,
+        addItem,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
-}
+};

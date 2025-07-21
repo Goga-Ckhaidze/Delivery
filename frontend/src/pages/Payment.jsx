@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../components/CartContext.jsx';
 
 function Payment() {
   const navigate = useNavigate();
-  const { cartItems, clearCart } = useCart();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -50,22 +48,43 @@ function Payment() {
     if (!validate()) return;
 
     const token = localStorage.getItem('token');
+
     if (!token) {
       alert('User is not authenticated. Please login first.');
       return;
     }
 
-    if (cartItems.length === 0) {
-      alert('Your cart is empty. Please add items before placing an order.');
-      return;
-    }
+    // Use CartContext's cartItems or fallback to empty array here
+    // But since this is standalone, fetch cartItems from CartContext or backend if you want
+    // For now, let's fetch from backend for consistency:
 
     try {
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      const userId = decodedToken._id;
+
+      // Fetch latest cart from backend
+      const cartRes = await fetch(`https://deliveryback-y8wi.onrender.com/api/cart/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!cartRes.ok) {
+        alert('Failed to fetch cart items.');
+        return;
+      }
+      const cartData = await cartRes.json();
+      const cartItems = cartData.items || [];
+
+      if (cartItems.length === 0) {
+        alert('Your cart is empty. Please add items before placing an order.');
+        return;
+      }
+
       const response = await fetch('https://deliveryback-y8wi.onrender.com/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ name, phone, location: { lat, lng }, items: cartItems }),
       });
@@ -75,7 +94,7 @@ function Payment() {
 
       if (response.ok) {
         alert('Order successfully placed!');
-        // Clear inputs & storage
+        // Clear local storage & inputs
         setName('');
         setPhone('');
         setLocationChosen(false);
@@ -86,15 +105,15 @@ function Payment() {
         localStorage.removeItem('locationChosen');
         localStorage.removeItem('locationLat');
         localStorage.removeItem('locationLng');
+        localStorage.removeItem('cartItems'); // if you still use localStorage for cart
 
-        clearCart(); // clear cart in context (and sync backend)
-
+        // Optionally clear cart in CartContext here or via global state
         window.location = '/';
       } else {
         alert(data.message || 'Something went wrong.');
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       alert('Server error. Try again later.');
     }
   };
@@ -136,7 +155,9 @@ function Payment() {
           }}
         />
         {errors.name && (
-          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.name}</div>
+          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>
+            {errors.name}
+          </div>
         )}
 
         <input
@@ -158,7 +179,9 @@ function Payment() {
           }}
         />
         {errors.phone && (
-          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.phone}</div>
+          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>
+            {errors.phone}
+          </div>
         )}
 
         <button
@@ -177,7 +200,9 @@ function Payment() {
           📍 {locationChosen ? 'Location Chosen ✔' : 'Choose Delivery Location'}
         </button>
         {errors.location && (
-          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.location}</div>
+          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>
+            {errors.location}
+          </div>
         )}
 
         {locationChosen && lat !== null && lng !== null && (
@@ -189,7 +214,8 @@ function Payment() {
               textAlign: 'center',
             }}
           >
-            📍 <strong>Latitude:</strong> {lat.toFixed(6)}, <strong>Longitude:</strong> {lng.toFixed(6)}
+            📍 <strong>Latitude:</strong> {lat.toFixed(6)}, <strong>Longitude:</strong>{' '}
+            {lng.toFixed(6)}
           </p>
         )}
 
