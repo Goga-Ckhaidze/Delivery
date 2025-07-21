@@ -7,15 +7,26 @@ function MyOrder() {
   const [userID, setUserID] = useState(null);
 
 
-   async function handeDeliveredButton (index) {
-    const token = localStorage.getItem('token')
-    const orderToDeleteID = orders.filter((item , ind) => ind == index).map(map => map._id)
-    const response = await axios.delete(`https://deliveryback-y8wi.onrender.com/api/orders/orders/${orderToDeleteID}`, { token });
-    if(response){
-    setOrders(perv => perv.filter((item, i) => i !== index)) 
-    }
+async function handeDeliveredButton(index) {
+  const token = localStorage.getItem('token');
+  const orderToDeleteID = orders[index]._id;
 
-  };
+  try {
+    const response = await axios.delete(
+      `https://deliveryback-y8wi.onrender.com/api/orders/orders/${orderToDeleteID}`,
+      {
+        data: { token }, // ✅ CORRECT way to pass body in DELETE
+      }
+    );
+
+    if (response.status === 200) {
+      setOrders(prev => prev.filter((item, i) => i !== index));
+    }
+  } catch (error) {
+    console.error('Failed to delete order:', error.response?.data || error.message);
+  }
+}
+
   
 
   // Decode token to get user ID
@@ -147,7 +158,12 @@ function MyOrder() {
                     <p className="total-value">
                       Total: <strong>${total.toFixed(2)}</strong>
                     </p>
-                      <button className='login' onClick={() => handeDeliveredButton(index)}>Order Delivered ✓</button>
+                      {order.user_id === userID && (
+  <button className='login' onClick={() => handeDeliveredButton(index)}>
+    Order Delivered ✓
+  </button>
+)}
+
                   </div>
                 </div>
               </section>

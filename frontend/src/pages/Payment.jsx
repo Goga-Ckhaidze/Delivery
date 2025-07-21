@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../components/CartContext.jsx';
 
 function Payment() {
   const navigate = useNavigate();
+  const { cartItems, clearCart } = useCart();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -11,7 +13,6 @@ function Payment() {
   const [lng, setLng] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // Load from localStorage
   useEffect(() => {
     const isChosen = localStorage.getItem('locationChosen') === 'true';
     const storedLat = localStorage.getItem('locationLat');
@@ -49,8 +50,10 @@ function Payment() {
     if (!validate()) return;
 
     const token = localStorage.getItem('token');
-
-    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    if (!token) {
+      alert('User is not authenticated. Please login first.');
+      return;
+    }
 
     if (cartItems.length === 0) {
       alert('Your cart is empty. Please add items before placing an order.');
@@ -60,11 +63,15 @@ function Payment() {
     try {
       const response = await fetch('https://deliveryback-y8wi.onrender.com/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, location: { lat, lng }, items: cartItems, token }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, phone, location: { lat, lng }, items: cartItems }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
 
       if (response.ok) {
         alert('Order successfully placed!');
@@ -79,8 +86,10 @@ function Payment() {
         localStorage.removeItem('locationChosen');
         localStorage.removeItem('locationLat');
         localStorage.removeItem('locationLng');
-        localStorage.removeItem('cartItems');
-        window.location = "/";
+
+        clearCart(); // clear cart in context (and sync backend)
+
+        window.location = '/';
       } else {
         alert(data.message || 'Something went wrong.');
       }
@@ -92,49 +101,114 @@ function Payment() {
 
   return (
     <>
-    <div className="ptpb"></div>
-    <div style={{ maxWidth: 450, margin: '50px auto', padding: 30, background: '#fff', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', fontFamily: 'Arial, sans-serif' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 25, color: '#333' }}>Complete Your Order</h2>
-
-      <input
-        type="text"
-        placeholder="Full Name"
-        value={name}
-        onChange={e => {
-          setName(e.target.value);
-          localStorage.setItem('userName', e.target.value);
+      <div className="ptpb"></div>
+      <div
+        style={{
+          maxWidth: 450,
+          margin: '50px auto',
+          padding: 30,
+          background: '#fff',
+          borderRadius: 12,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+          fontFamily: 'Arial, sans-serif',
         }}
-        style={{ width: '100%', padding: 14, fontSize: 16, marginBottom: 10, borderRadius: 8, border: '1px solid #ddd', outlineColor: '#00a082' }}
-      />
-      {errors.name && <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.name}</div>}
+      >
+        <h2 style={{ textAlign: 'center', marginBottom: 25, color: '#333' }}>
+          Complete Your Order
+        </h2>
 
-      <input
-        type="tel"
-        placeholder="Phone Number"
-        value={phone}
-        onChange={e => {
-          setPhone(e.target.value);
-          localStorage.setItem('userPhone', e.target.value);
-        }}
-        style={{ width: '100%', padding: 14, fontSize: 16, marginBottom: 10, borderRadius: 8, border: '1px solid #ddd', outlineColor: '#00a082' }}
-      />
-      {errors.phone && <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.phone}</div>}
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            localStorage.setItem('userName', e.target.value);
+          }}
+          style={{
+            width: '100%',
+            padding: 14,
+            fontSize: 16,
+            marginBottom: 10,
+            borderRadius: 8,
+            border: '1px solid #ddd',
+            outlineColor: '#00a082',
+          }}
+        />
+        {errors.name && (
+          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.name}</div>
+        )}
 
-      <button onClick={handleChooseLocation} style={{ width: '100%', padding: 14, fontSize: 16, backgroundColor: '#ffc440', borderRadius: 8, border: 'none', marginBottom: 10, cursor: 'pointer' }}>
-        📍 {locationChosen ? 'Location Chosen ✔' : 'Choose Delivery Location'}
-      </button>
-      {errors.location && <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.location}</div>}
+        <input
+          type="tel"
+          placeholder="Phone Number"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            localStorage.setItem('userPhone', e.target.value);
+          }}
+          style={{
+            width: '100%',
+            padding: 14,
+            fontSize: 16,
+            marginBottom: 10,
+            borderRadius: 8,
+            border: '1px solid #ddd',
+            outlineColor: '#00a082',
+          }}
+        />
+        {errors.phone && (
+          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.phone}</div>
+        )}
 
-      {locationChosen && lat !== null && lng !== null && (
-        <p style={{ fontSize: 14, marginBottom: 20, color: '#555', textAlign: 'center' }}>
-          📍 <strong>Latitude:</strong> {lat.toFixed(6)}, <strong>Longitude:</strong> {lng.toFixed(6)}
-        </p>
-      )}
+        <button
+          onClick={handleChooseLocation}
+          style={{
+            width: '100%',
+            padding: 14,
+            fontSize: 16,
+            backgroundColor: '#ffc440',
+            borderRadius: 8,
+            border: 'none',
+            marginBottom: 10,
+            cursor: 'pointer',
+          }}
+        >
+          📍 {locationChosen ? 'Location Chosen ✔' : 'Choose Delivery Location'}
+        </button>
+        {errors.location && (
+          <div style={{ color: '#e53935', fontSize: 14, marginBottom: 10 }}>{errors.location}</div>
+        )}
 
-      <button onClick={handleOrder} style={{ width: '100%', padding: 14, fontSize: 16, backgroundColor: '#00a082', borderRadius: 8, border: 'none', color: '#fff', cursor: 'pointer' }}>
-        🛒 Place Order
-      </button>
-    </div>
+        {locationChosen && lat !== null && lng !== null && (
+          <p
+            style={{
+              fontSize: 14,
+              marginBottom: 20,
+              color: '#555',
+              textAlign: 'center',
+            }}
+          >
+            📍 <strong>Latitude:</strong> {lat.toFixed(6)}, <strong>Longitude:</strong> {lng.toFixed(6)}
+          </p>
+        )}
+
+        <button
+          onClick={handleOrder}
+          style={{
+            width: '100%',
+            padding: 14,
+            fontSize: 16,
+            backgroundColor: '#00a082',
+            borderRadius: 8,
+            border: 'none',
+            color: '#fff',
+            cursor: 'pointer',
+          }}
+        >
+          🛒 Place Order
+        </button>
+      </div>
     </>
   );
 }
