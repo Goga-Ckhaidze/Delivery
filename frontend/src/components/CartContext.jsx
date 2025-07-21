@@ -42,12 +42,29 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     async function fetchOrCreateCart() {
       try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found, please login");
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
         const savedCartId = localStorage.getItem("cartId");
+
         if (savedCartId) {
-          const res = await axios.get(`https://deliveryback-y8wi.onrender.com/api/cart/${savedCartId}`);
+          const res = await axios.get(
+            `https://deliveryback-y8wi.onrender.com/api/cart/${savedCartId}`,
+            config
+          );
           dispatch({ type: "SET_CART", payload: res.data });
         } else {
-          const res = await axios.post("https://deliveryback-y8wi.onrender.com/api/cart", { items: [] });
+          const res = await axios.post(
+            "https://deliveryback-y8wi.onrender.com/api/cart",
+            { items: [] },
+            config
+          );
           localStorage.setItem("cartId", res.data._id);
           dispatch({ type: "SET_CART", payload: res.data });
         }
@@ -61,14 +78,25 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (item) => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No token found, please login");
+
       const updatedItems = [...state.cartItems, item];
       dispatch({ type: "ADD_ITEM", payload: item });
 
       if (state.cartId) {
-        await axios.put(`https://deliveryback-y8wi.onrender.com/api/cart/${state.cartId}`, {
-          items: updatedItems,
-        });
-      }
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        await axios.put(
+          `https://deliveryback-y8wi.onrender.com/api/cart/${state.cartId}`,
+          { items: updatedItems },
+          config
+        );
+      }a
     } catch (error) {
       console.error("Error syncing cart:", error);
       dispatch({ type: "SET_ERROR", payload: error.message });
