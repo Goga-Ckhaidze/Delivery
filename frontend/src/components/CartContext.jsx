@@ -1,7 +1,7 @@
-import React, { createContext, useReducer, useEffect } from "react";
+import React, { createContext, useReducer, useEffect, useContext } from "react";
 import axios from "axios";
 
-export const CartContext = createContext();
+const CartContext = createContext();
 
 const initialState = {
   cartItems: [],
@@ -39,17 +39,14 @@ function reducer(state, action) {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Load cart from backend or create new one
   useEffect(() => {
     async function fetchOrCreateCart() {
       try {
         const savedCartId = localStorage.getItem("cartId");
         if (savedCartId) {
-          // Try to get existing cart
           const res = await axios.get(`https://deliveryback-y8wi.onrender.com/api/cart/${savedCartId}`);
           dispatch({ type: "SET_CART", payload: res.data });
         } else {
-          // Create new cart
           const res = await axios.post("https://deliveryback-y8wi.onrender.com/api/cart", { items: [] });
           localStorage.setItem("cartId", res.data._id);
           dispatch({ type: "SET_CART", payload: res.data });
@@ -62,13 +59,11 @@ export const CartProvider = ({ children }) => {
     fetchOrCreateCart();
   }, []);
 
-  // Add item to cart locally and sync with backend
-  const addItem = async (item) => {
+  const addToCart = async (item) => {
     try {
       const updatedItems = [...state.cartItems, item];
       dispatch({ type: "ADD_ITEM", payload: item });
 
-      // Sync with backend
       if (state.cartId) {
         await axios.put(`https://deliveryback-y8wi.onrender.com/api/cart/${state.cartId}`, {
           items: updatedItems,
@@ -86,10 +81,12 @@ export const CartProvider = ({ children }) => {
         cartItems: state.cartItems,
         loading: state.loading,
         error: state.error,
-        addItem,
+        addToCart,
       }}
     >
       {children}
     </CartContext.Provider>
   );
 };
+
+export const useCart = () => useContext(CartContext);
