@@ -82,7 +82,7 @@ function Header() {
               onMouseLeave={() => setShowDropdown(false)}
             >
               <button className="login">
-                🛒 Cart ({cartCount})
+                🛒 Cart ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})
               </button>
               {showDropdown && (
                 <div className="cart-dropdown">

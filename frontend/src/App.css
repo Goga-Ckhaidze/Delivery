@@ -602,3 +602,41 @@ body {
     min-width: 100%;
   }
 }
+
+@media (max-width: 390px) {
+  .buttons {
+    display: block;
+  }
+  .welcomeImage {
+    display: none;
+  }
+  .sushiTitle {
+    text-align: center;
+  }
+}
+
+@media (max-width: 1150px) {
+  .card {
+    max-width: 50%!important;
+    min-width: 50%!important;
+  }
+  .cardFlex {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 650px) {
+  .card {
+    max-width: 100%!important;
+    min-width: 100%!important;
+  }
+  .sushiTitle {
+    padding-left: 20px;
+  }
+}
+
+@media (max-width: 359px) {
+  .checkout-btn {
+    margin-bottom: 10px;
+  }
+}

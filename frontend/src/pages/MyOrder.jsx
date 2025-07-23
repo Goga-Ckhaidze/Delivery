@@ -13,7 +13,7 @@ async function handeDeliveredButton(index) {
 
   try {
     const response = await axios.delete(
-      `https://deliveryback-y8wi.onrender.com/api/orders/orders/${orderToDeleteID}`,
+      `https://deliveryback-y8wi.onrender.com/api/orders/${orderToDeleteID}`,
       {
         data: { token }, // ✅ CORRECT way to pass body in DELETE
       }

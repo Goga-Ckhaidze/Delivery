@@ -30,7 +30,8 @@ function BurgerPage() {
             addToCart({
               title: 'Yummy Burger',
               price: 19.5,
-              image: '/images/burger2.avif'
+              image: '/images/burger2.avif',
+              quantity: 1,
             })
           }>Order</button>
           </div>
@@ -49,7 +50,8 @@ function BurgerPage() {
             addToCart({
               title: 'Tasty Burger',
               price: 20.0,
-              image: '/images/burger3.jpg'
+              image: '/images/burger3.jpg',
+              quantity: 1,
             })
           }>Order</button>
           </div>
@@ -68,7 +70,8 @@ function BurgerPage() {
             addToCart({
               title: 'Delicious Burger',
               price: 17.99,
-              image: '/images/burger1.jpg'
+              image: '/images/burger1.jpg',
+              quantity: 1,
             })
           }>Order</button>
           </div>

@@ -29,7 +29,8 @@ function pizza() {
             addToCart({
               title: 'Delicious Pizza',
               price: 11.50,
-              image: '/images/pizza1.jpg'
+              image: '/images/pizza1.jpg',
+              quantity: 1,
             })
           }>Order</button>
           </div>
@@ -48,7 +49,8 @@ function pizza() {
             addToCart({
               title: 'Yummy Pizza',
               price: 23.00,
-              image: '/images/pizza2.jpg'
+              image: '/images/pizza2.jpg',
+              quantity: 1,
             })
           }>Order</button>
           </div>
@@ -67,7 +69,8 @@ function pizza() {
             addToCart({
               title: 'Tasty Pizza',
               price: 13.99,
-              image: '/images/pizza3.jpg'
+              image: '/images/pizza3.jpg',
+              quantity: 1,
             })
           }>Order</button>
           </div>
