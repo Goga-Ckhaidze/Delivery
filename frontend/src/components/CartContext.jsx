@@ -1,115 +1,117 @@
-import React, { createContext, useReducer, useEffect, useContext } from "react";
-import axios from "axios";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 
+// Create context
 const CartContext = createContext();
 
+// Initial state
 const initialState = {
-  cartItems: [],
-  loading: true,
+  cartItems: JSON.parse(localStorage.getItem("cartItems")) || [],
+  loading: false,
   error: null,
-  cartId: null,
 };
 
-function reducer(state, action) {
+// Reducer
+function cartReducer(state, action) {
   switch (action.type) {
-    case "SET_CART":
+    case "ADD_TO_CART":
+      const existingItem = state.cartItems.find(
+        (item) => item.title === action.payload.title
+      );
+
+      if (existingItem) {
+        return {
+          ...state,
+          cartItems: state.cartItems.map((item) =>
+            item.title === action.payload.title
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          ),
+        };
+      } else {
+        return {
+          ...state,
+          cartItems: [...state.cartItems, { ...action.payload, quantity: 1 }],
+        };
+      }
+
+    case "INCREMENT_ITEM":
       return {
         ...state,
-        cartItems: action.payload.items,
-        cartId: action.payload._id,
-        loading: false,
-        error: null,
+        cartItems: state.cartItems.map((item) =>
+          item.title === action.payload
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        ),
       };
-    case "ADD_ITEM":
+
+    case "DECREMENT_ITEM":
       return {
         ...state,
-        cartItems: [...state.cartItems, action.payload],
+        cartItems: state.cartItems
+          .map((item) =>
+            item.title === action.payload
+              ? { ...item, quantity: item.quantity - 1 }
+              : item
+          )
+          .filter((item) => item.quantity > 0), // Remove if quantity hits 0
       };
-    case "SET_ERROR":
+
+    case "REMOVE_FROM_CART":
       return {
         ...state,
-        error: action.payload,
-        loading: false,
+        cartItems: state.cartItems.filter((item) => item.title !== action.payload),
       };
+
+    case "CLEAR_CART":    // <-- Added this
+      return {
+        ...state,
+        cartItems: [],
+      };
+
     default:
       return state;
   }
 }
 
+// Provider
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
+  // Save to localStorage on every cart change
   useEffect(() => {
-    async function fetchOrCreateCart() {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No token found, please login");
+    localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
+  }, [state.cartItems]);
 
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
+  // Functions to call
+  const addToCart = (item) => {
+    dispatch({ type: "ADD_TO_CART", payload: item });
+  };
 
-        const savedCartId = localStorage.getItem("cartId");
+  const incrementItem = (title) => {
+    dispatch({ type: "INCREMENT_ITEM", payload: title });
+  };
 
-        if (savedCartId) {
-          const res = await axios.get(
-            `https://deliveryback-y8wi.onrender.com/api/cart/${savedCartId}`,
-            config
-          );
-          dispatch({ type: "SET_CART", payload: res.data });
-        } else {
-          const res = await axios.post(
-            "https://deliveryback-y8wi.onrender.com/api/cart",
-            { items: [] },
-            config
-          );
-          localStorage.setItem("cartId", res.data._id);
-          dispatch({ type: "SET_CART", payload: res.data });
-        }
-      } catch (error) {
-        console.error("Error fetching or creating cart:", error);
-        dispatch({ type: "SET_ERROR", payload: error.message });
-      }
-    }
-    fetchOrCreateCart();
-  }, []);
+  const decrementItem = (title) => {
+    dispatch({ type: "DECREMENT_ITEM", payload: title });
+  };
 
-  const addToCart = async (item) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found, please login");
+  const removeFromCart = (title) => {
+    dispatch({ type: "REMOVE_FROM_CART", payload: title });
+  };
 
-      const updatedItems = [...state.cartItems, item];
-      dispatch({ type: "ADD_ITEM", payload: item });
-
-      if (state.cartId) {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        await axios.put(
-          `https://deliveryback-y8wi.onrender.com/api/cart/${state.cartId}`,
-          { items: updatedItems },
-          config
-        );
-      }a
-    } catch (error) {
-      console.error("Error syncing cart:", error);
-      dispatch({ type: "SET_ERROR", payload: error.message });
-    }
+  const clearCart = () => {
+    dispatch({ type: "CLEAR_CART" });
   };
 
   return (
     <CartContext.Provider
       value={{
         cartItems: state.cartItems,
-        loading: state.loading,
-        error: state.error,
         addToCart,
+        incrementItem,
+        decrementItem,
+        removeFromCart,
+        clearCart,   // <-- Expose clearCart here
       }}
     >
       {children}
@@ -117,4 +119,5 @@ export const CartProvider = ({ children }) => {
   );
 };
 
+// Hook
 export const useCart = () => useContext(CartContext);

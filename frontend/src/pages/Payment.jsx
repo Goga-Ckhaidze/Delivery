@@ -48,73 +48,78 @@ function Payment() {
     if (!validate()) return;
 
     const token = localStorage.getItem('token');
-
     if (!token) {
       alert('User is not authenticated. Please login first.');
       return;
     }
 
-    // Use CartContext's cartItems or fallback to empty array here
-    // But since this is standalone, fetch cartItems from CartContext or backend if you want
-    // For now, let's fetch from backend for consistency:
+    const cartItemsStr = localStorage.getItem('cartItems');
+    const cartItems = cartItemsStr ? JSON.parse(cartItemsStr) : [];
+
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
 
     try {
-      const decodedToken = JSON.parse(atob(token.split('.')[1]));
-      const userId = decodedToken._id;
+      // Debug log: show exactly what is being sent
+const totalPrice = cartItems.reduce(
+  (sum, item) => sum + item.price * item.quantity,
+  0
+);
 
-      // Fetch latest cart from backend
-      const cartRes = await fetch(`https://deliveryback-y8wi.onrender.com/api/cart/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!cartRes.ok) {
-        alert('Failed to fetch cart items.');
-        return;
-      }
-      const cartData = await cartRes.json();
-      const cartItems = cartData.items || [];
+const orderPayload = {
+  name,
+  phone,
+  location: { lat, lng },
+  items: cartItems,
+  totalPrice,
+};
 
-      if (cartItems.length === 0) {
-        alert('Your cart is empty. Please add items before placing an order.');
-        return;
-      }
+console.log('Sending order:', orderPayload);
 
-      const response = await fetch('https://deliveryback-y8wi.onrender.com/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, phone, location: { lat, lng }, items: cartItems }),
-      });
+const response = await fetch('https://deliveryback-y8wi.onrender.com/api/orders', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify(orderPayload),
+});
 
       const text = await response.text();
-      const data = text ? JSON.parse(text) : {};
-
-      if (response.ok) {
-        alert('Order successfully placed!');
-        // Clear local storage & inputs
-        setName('');
-        setPhone('');
-        setLocationChosen(false);
-        setLat(null);
-        setLng(null);
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userPhone');
-        localStorage.removeItem('locationChosen');
-        localStorage.removeItem('locationLat');
-        localStorage.removeItem('locationLng');
-        localStorage.removeItem('cartItems'); // if you still use localStorage for cart
-
-        // Optionally clear cart in CartContext here or via global state
-        window.location = '/';
-      } else {
-        alert(data.message || 'Something went wrong.');
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
       }
+
+      if (!response.ok) {
+        console.error('Order API error:', response.status, data);
+        alert(data.message || `Error: ${response.status}`);
+        return;
+      }
+
+      alert('Order successfully placed!');
+      // Clear form and localStorage items
+      setName('');
+      setPhone('');
+      setLocationChosen(false);
+      setLat(null);
+      setLng(null);
+
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userPhone');
+      localStorage.removeItem('locationChosen');
+      localStorage.removeItem('locationLat');
+      localStorage.removeItem('locationLng');
+      localStorage.removeItem('cartItems');
+
+      window.location = '/';
     } catch (error) {
-      console.error(error);
-      alert('Server error. Try again later.');
+      console.error('Network/server error:', error);
+      alert('Server error. Please try again later.');
     }
   };
 

@@ -25,9 +25,10 @@ function Sushi() {
                   className="order-btn"
                   onClick={() =>
                     addToCart({
-                      name: 'Tasty Sushi',
+                      title: 'Tasty Sushi',
                       price: 30.0,
                       image: '/images/sushi1.jpg',
+                      quantity: 1,
                     })
                   }
                 >
@@ -49,9 +50,10 @@ function Sushi() {
                   className="order-btn"
                   onClick={() =>
                     addToCart({
-                      name: 'Delicious Sushi',
+                      title: 'Delicious Sushi',
                       price: 22.9,
                       image: '/images/sushi2.jpg',
+                      quantity: 1,
                     })
                   }
                 >
@@ -73,9 +75,10 @@ function Sushi() {
                   className="order-btn"
                   onClick={() =>
                     addToCart({
-                      name: 'Yummy Sushi',
+                      title: 'Yummy Sushi',
                       price: 23.4,
                       image: '/images/sushi3.avif',
+                      quantity: 1,
                     })
                   }
                 >
