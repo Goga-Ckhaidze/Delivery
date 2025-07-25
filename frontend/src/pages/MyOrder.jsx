@@ -10,7 +10,7 @@ function MyOrder() {
    async function handeDeliveredButton (index) {
     const token = localStorage.getItem('token')
     const orderToDeleteID = orders.filter((item , ind) => ind == index).map(map => map._id)
-    const response = await axios.delete(`http://localhost:5000/api/orders/orders/${orderToDeleteID}`, { token });
+    const response = await axios.delete(`https://deliveryback-y8wi.onrender.com/api/orders/orders/${orderToDeleteID}`, { token });
     if(response){
     setOrders(perv => perv.filter((item, i) => i !== index)) 
     }
@@ -40,7 +40,7 @@ function MyOrder() {
 
     const getOrders = async () => {
       try {
-        const response = await axios.post('http://localhost:5000/api/orders/my-orders', { token });
+        const response = await axios.post('https://deliveryback-y8wi.onrender.com/api/orders/my-orders', { token });
 
         // Map orders: convert deliveryEndTime to timestamp, calculate remaining minutes
         const normalizedOrders = response.data.map(order => {
