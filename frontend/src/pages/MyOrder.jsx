@@ -38,6 +38,10 @@ try {
       },
     }
   );
+  console.log('Fetched user orders:', response.data);
+  console.log('Decoded userID:', userID);
+
+
         const normalizedOrders = response.data.map(order => {
           const deliveryEndTime = order.deliveryEndTime ? new Date(order.deliveryEndTime).getTime() : null;
           const remaining = deliveryEndTime ? Math.max(0, Math.floor((deliveryEndTime - Date.now()) / 60000)) : 0;
