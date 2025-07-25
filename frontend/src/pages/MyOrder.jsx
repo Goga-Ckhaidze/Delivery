@@ -79,7 +79,11 @@ function MyOrder() {
         `https://deliveryback-y8wi.onrender.com/api/orders/${orderToDeleteID}`,
         {
           data: { token },
-        }
+          headers: {
+          Authorization: `Bearer ${token}`,
+         },
+        },
+        
       );
 
       if (response.status === 200) {
