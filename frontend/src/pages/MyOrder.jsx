@@ -38,8 +38,6 @@ try {
       },
     }
   );
-  console.log('Fetched user orders:', response.data);
-  console.log('Decoded userID:', userID);
 
 
         const normalizedOrders = response.data.map(order => {
