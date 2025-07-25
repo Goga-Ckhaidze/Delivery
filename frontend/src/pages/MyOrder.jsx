@@ -2,21 +2,8 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
 function MyOrder() {
-
   const [orders, setOrders] = useState([]);
   const [userID, setUserID] = useState(null);
-
-
-   async function handeDeliveredButton (index) {
-    const token = localStorage.getItem('token')
-    const orderToDeleteID = orders.filter((item , ind) => ind == index).map(map => map._id)
-    const response = await axios.delete(`https://deliveryback-y8wi.onrender.com/api/orders/orders/${orderToDeleteID}`, { token });
-    if(response){
-    setOrders(perv => perv.filter((item, i) => i !== index)) 
-    }
-
-  };
-  
 
   // Decode token to get user ID
   useEffect(() => {
@@ -33,16 +20,24 @@ function MyOrder() {
     }
   }, []);
 
-  // Fetch user orders
+  // Fetch user orders once userID is available
   useEffect(() => {
+    if (!userID) return;
+
     const token = localStorage.getItem('token');
     if (!token) return;
 
     const getOrders = async () => {
-      try {
-        const response = await axios.post('https://deliveryback-y8wi.onrender.com/api/orders/my-orders', { token });
-
-        // Map orders: convert deliveryEndTime to timestamp, calculate remaining minutes
+try {
+  const response = await axios.post(
+    'https://deliveryback-y8wi.onrender.com/api/orders/my-orders',
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
         const normalizedOrders = response.data.map(order => {
           const deliveryEndTime = order.deliveryEndTime ? new Date(order.deliveryEndTime).getTime() : null;
           const remaining = deliveryEndTime ? Math.max(0, Math.floor((deliveryEndTime - Date.now()) / 60000)) : 0;
@@ -59,30 +54,52 @@ function MyOrder() {
         console.error('Failed to fetch orders:', error);
       }
     };
-    getOrders();
-  }, []);
 
-  // Update countdown every minute
+    getOrders();
+  }, [userID]);
+
+  // Update delivery time countdown every minute
   useEffect(() => {
     if (!userID) return;
 
     const interval = setInterval(() => {
       setOrders(prevOrders =>
         prevOrders.map(order => {
-          if (order.user_id === userID && order.deliveryEndTime) {
+          if (order.deliveryEndTime) {
             const remaining = Math.max(0, Math.floor((order.deliveryEndTime - Date.now()) / 60000));
-            return {
-              ...order,
-              deliveryTime: remaining,
-            };
+            return { ...order, deliveryTime: remaining };
           }
           return order;
         })
       );
     }, 60000);
+
     return () => clearInterval(interval);
   }, [userID]);
-  
+
+  async function handleDeliveredButton(index) {
+    const token = localStorage.getItem('token');
+    const orderToDeleteID = orders[index]._id;
+
+    try {
+      const response = await axios.delete(
+        `https://deliveryback-y8wi.onrender.com/api/orders/${orderToDeleteID}`,
+        {
+          data: { token },
+          headers: {
+          Authorization: `Bearer ${token}`,
+         },
+        },
+        
+      );
+
+      if (response.status === 200) {
+        setOrders(prev => prev.filter((item, i) => i !== index));
+      }
+    } catch (error) {
+      console.error('Failed to delete order:', error.response?.data || error.message);
+    }
+  }
   return (
     <>
       <div className="ptpb"></div>
@@ -119,13 +136,15 @@ function MyOrder() {
   <h4>Items Ordered:</h4>
 
 
-  {order.deliveryTime > 0 ? (
-    <p className="delivery-time">
-      ⏰ Delivery Time: {order.deliveryTime} minute{order.deliveryTime !== 1 ? 's' : ''} left
-    </p>
-  ) : (
-    <p className="delivery-time late">❌ Delivery Late</p>
-  )}
+{order.deliveryTime > 0 ? (
+  <p className="delivery-time">
+    ⏰ Delivery Time: {order.deliveryTime} minute{order.deliveryTime !== 1 ? 's' : ''} left
+  </p>
+) : order.deliveryTime === 0 ? (
+  <p className="delivery-time late">Order Not Taken</p>
+) : (
+  <p className="delivery-time late">❌ Delivery Late</p>
+)}
 
 
 </div>
@@ -147,7 +166,12 @@ function MyOrder() {
                     <p className="total-value">
                       Total: <strong>${total.toFixed(2)}</strong>
                     </p>
-                      <button className='login' onClick={() => handeDeliveredButton(index)}>Order Delivered ✓</button>
+                      {order.user_id === userID && (
+  <button className='login' onClick={() => handleDeliveredButton(index)}>
+    Order Delivered ✓
+  </button>
+)}
+
                   </div>
                 </div>
               </section>
