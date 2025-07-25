@@ -28,8 +28,20 @@ function MyOrder() {
     if (!token) return;
 
     const getOrders = async () => {
-      try {
-        const response = await axios.post('https://deliveryback-y8wi.onrender.com/api/orders/my-orders', { token });
+try {
+  const response = await axios.post(
+    'https://deliveryback-y8wi.onrender.com/api/orders/my-orders',
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+// GABANURI XODI
+
+
+
 
         const normalizedOrders = response.data.map(order => {
           const deliveryEndTime = order.deliveryEndTime ? new Date(order.deliveryEndTime).getTime() : null;
