@@ -96,10 +96,15 @@ const response = await fetch('https://deliveryback-y8wi.onrender.com/api/orders'
       }
 
       if (!response.ok) {
-        console.error('Order API error:', response.status, data);
-        alert(data.message || `Error: ${response.status}`);
-        return;
-      }
+  console.error('Order API error:', response.status, data);
+  
+  if (data.message === 'You already have an active order. Please wait until it is delivered or deleted.') {
+    alert('⚠️ You already placed an order. Please wait until it is delivered or deleted before placing another.');
+  } else {
+    alert(data.message || `Error: ${response.status}`);
+  }
+  return
+}
 
       alert('Order successfully placed!');
       // Clear form and localStorage items
