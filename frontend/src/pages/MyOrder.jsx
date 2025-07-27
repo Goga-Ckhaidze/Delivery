@@ -39,7 +39,6 @@ try {
     }
   );
 
-
         const normalizedOrders = response.data.map(order => {
           const deliveryEndTime = order.deliveryEndTime ? new Date(order.deliveryEndTime).getTime() : null;
           const remaining = deliveryEndTime ? Math.max(0, Math.floor((deliveryEndTime - Date.now()) / 60000)) : 0;
@@ -58,6 +57,7 @@ try {
     };
 
     getOrders();
+
   }, [userID]);
 
   // Update delivery time countdown every minute
