@@ -102,6 +102,7 @@ try {
       console.error('Failed to delete order:', error.response?.data || error.message);
     }
   }
+
   return (
     <>
       <div className="ptpb"></div>
@@ -137,18 +138,15 @@ try {
 <div className="left-right">
   <h4>Items Ordered:</h4>
 
-
-{order.deliveryTime > 0 ? (
+{order.takenBy === null || order.takenBy === undefined ? (
+  <p className="delivery-time late">Order Not Taken</p>
+) : order.deliveryEndTime && order.deliveryTime > 0 ? (
   <p className="delivery-time">
     ⏰ Delivery Time: {order.deliveryTime} minute{order.deliveryTime !== 1 ? 's' : ''} left
   </p>
-) : order.deliveryTime === 0 ? (
-  <p className="delivery-time late">❌ Delivery Late</p>
-
 ) : (
-  <p className="delivery-time late">Order Not Taken</p>
-)}  
-
+  <p className="delivery-time late">❌ Delivery Late</p>
+)}
 
 
 </div>
