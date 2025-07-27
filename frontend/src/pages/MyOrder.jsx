@@ -143,10 +143,12 @@ try {
     ⏰ Delivery Time: {order.deliveryTime} minute{order.deliveryTime !== 1 ? 's' : ''} left
   </p>
 ) : order.deliveryTime === 0 ? (
-  <p className="delivery-time late">Order Not Taken</p>
-) : (
   <p className="delivery-time late">❌ Delivery Late</p>
-)}
+
+) : (
+  <p className="delivery-time late">Order Not Taken</p>
+)}  
+
 
 
 </div>
